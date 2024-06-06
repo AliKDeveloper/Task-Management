@@ -19,9 +19,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Task routes
     Route::resource('tasks', TaskController::class);
-    Route::post('taskss/import', [TaskController::class, 'import']);
-    Route::get('taskss/export', [TaskController::class, 'export']);
-    Route::get('tasks/progress', [TaskController::class, 'progress']);
+    Route::post('tasks-import', [TaskController::class, 'import']);
+    Route::get('tasks-export', [TaskController::class, 'export']);
+    Route::get('tasks-progress', [TaskController::class, 'progress']);
 
     // Subtask routes
     Route::resource('subtasks', SubtaskController::class);

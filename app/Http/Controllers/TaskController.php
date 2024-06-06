@@ -27,7 +27,7 @@ class TaskController extends Controller
 
     public function store(Request $request)
     {
-        //Gate::authorize('isProductOwner', auth()->user());
+        Gate::authorize('isProductOwner', auth()->user());
 
         $request->validate([
             'title' => 'required|string|max:255',
@@ -53,7 +53,6 @@ class TaskController extends Controller
 
     public function show($id)
     {
-       // $task = Task::with('assignedUser', 'subtasks', 'logs')->findOrFail($id);
         $task = Task::findOrFail($id);
 
         return response()->json($task);

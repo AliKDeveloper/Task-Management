@@ -28,7 +28,8 @@ class AuthController extends Controller
         ]);
 
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $device = substr($request->userAgent() ?? '', 0, 255);
+        $token = $user->createToken($device)->plainTextToken;
 
         return response()->json(['access_token' => $token, 'token_type' => 'Bearer'], 201);
     }
@@ -46,7 +47,8 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->firstOrFail();
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        $device = substr($request->userAgent() ?? '', 0, 255);
+        $token = $user->createToken($device)->plainTextToken;
 
         return response()->json(['access_token' => $token, 'token_type' => 'Bearer']);
     }
