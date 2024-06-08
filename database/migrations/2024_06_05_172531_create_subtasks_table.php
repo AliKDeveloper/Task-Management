@@ -17,8 +17,7 @@ return new class extends Migration
             $table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');
             $table->string('title');
             $table->text('description');
-            $table->unsignedBigInteger('assigned_to')->nullable();
-            $table->foreign('assigned_to')->references('id')->on('users')->onDelete('set null');
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->cascadeOnDelete();
             $table->enum('status', ['TODO', 'IN_PROGRESS', 'READY_FOR_TEST', 'PO_REVIEW', 'DONE', 'REJECTED'])->default('TODO');
             $table->timestamps();
         });

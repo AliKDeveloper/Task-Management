@@ -1,33 +1,59 @@
 ## Laravel Tasks Management
 
-This is laravel Tasks Management project where we can manage tasks and subtasks and also there are different roles for different users in addition we can perform some custom artisan commands to specify jobs 
+This is laravel Tasks Management project where we can manage tasks and subtasks and also there are different roles for different users in addition we can perform some custom artisan commands to do specify jobs 
 
 ## Packages that are used in this project:
+
 - [league/csv](https://csv.thephpleague.com/)
-  we have used this package to take care of slug generation and make sure that the slug is unique.
+  we have used this package to deal with CSV files.
 - [sanctum](https://laravel.com/docs/11.x/sanctum) package for authentication
 > Form more information about those packages you can read more in the official documentation
 
 ## List of API Endpoints
 
+Users:
+
 1. **(get) /api/users**: List all the users
 2. **(post) /api/users**: store new users
 3. **(put) /api/users/{user}**: Update the user
 4. **(delete) /api/users/{user}**: delete the user
-5. **(get) /api/tasks**: List all the tasks
-6. **(post) /api/tasks**: store new tasks
-7. **(get) /api/tasks/{task}**: Get specific task details
-8. **(put) /api/tasks/{task}**: Update the task
-9. **(delete) /api/tasks/{task}**: delete the task
-10. **(post) /api/tasks-import**: Import tasks. 
-11. **(get) /api/tasks-export**: Export all the tasks
-12. **(get) /api/tasks-progress**: Get task progress
-13. **(get) /import-progress/{batchId}**: Get import progress
-14. **/api/login**: Login the user
-15. **/api/register**: Register the user
+
+Tasks:
+
+1. **(get) /api/tasks**: List all the tasks
+2. **(post) /api/tasks**: store new tasks
+3. **(get) /api/tasks/{task}**: Get specific task details
+4. **(put) /api/tasks/{task}**: Update the task
+5. **(delete) /api/tasks/{task}**: delete the task
+6. **(post) /api/tasks-import**: Import tasks. 
+7. **(get) /api/tasks-export**: Export all the tasks
+8. **(get) /api/tasks-progress**: Get task progress
+
+JobProgress:
+
+1. **(get) /import-progress/{batchId}**: Get import progress
+
+Change Task Status:
+
+1. **(put) /api/tasks/{taskId}/status/{status}**: Change task status
+
+Subtasks:
+
+1. **(get) /api/tasks/{taskId}/subtasks**: Get all subtasks for a specific task
+2. **(post) /api/tasks/{taskId}/subtasks/{subtaskId}**: Get a specific subtask
+3. **(post) /api/tasks/{taskId}/subtasks**: Create a new subtask
+4. **(put) /api/tasks/{taskId}/subtasks/{subtaskId}**: Update a subtask
+5. **(delete) /api/tasks/{taskId}/subtasks/{subtaskId}**: Delete a subtask
+
+Authentication:
+
+1. **/api/login**: Login the user
+2. **/api/register**: Register the user
+
 > Note: We have used **auth:sanctum** middleware for authentication. So, we have to pass the token in the header of request.
 
 ## List of Artisan Commands
+
 1. `php artisan user:create`: Create a new user
 2. `php artisan tasks:export {filename=tasks_export.csv}`: Export tasks to a CSV file
 3. `php artisan tasks:import {file}`: Import tasks from a CSV file 

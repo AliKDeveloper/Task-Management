@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\TasksResource;
 use App\Models\Task;
 use App\Models\User;
 use App\Models\TaskLog;
@@ -22,7 +23,7 @@ class TaskController extends Controller
     {
         //$tasks = Task::with('assignedUser', 'subtasks', 'logs')->get();
         $tasks = Task::all();
-        return response()->json($tasks);
+        return TasksResource::collection($tasks);
     }
 
     public function store(Request $request)
@@ -40,6 +41,7 @@ class TaskController extends Controller
             'description' => $request->description,
             'due_date' => $request->due_date,
             'assigned_to' => null,
+            'created_by'=> auth()->id(),
             'status' => 'TODO'
         ]);
 
@@ -48,14 +50,14 @@ class TaskController extends Controller
             'log' => 'Task created'
         ]);
 
-        return response()->json($task, 201);
+        return response()->json($task);
     }
 
     public function show($id)
     {
         $task = Task::findOrFail($id);
 
-        return response()->json($task);
+        return TasksResource::collection($task);
     }
 
     public function update(Request $request, $id)
@@ -95,6 +97,101 @@ class TaskController extends Controller
         $task->delete();
 
         return response()->json(['status' => true, 'message'=>'Task has been deleted successfully'], 200);
+    }
+
+    protected function assignTask($taskId, $userId)
+    {
+        Gate::authorize('isProductOwner', auth()->user());
+
+        $task = Task::findOrFail($taskId);
+        $task->assigned_to = $userId;
+        $task->save();
+
+        return response()->json($task);
+    }
+
+    // Change task status based on user role
+    public function changeStatus($taskId, $status)
+    {
+        $allowedStatuses = [];
+        $task = Task::findOrFail($taskId);
+
+        if (auth()->user()->role == 'product_owner')
+        {
+            $allowedStatuses[] = 'DONE';
+            $allowedStatuses[] = 'REJECTED';
+            $allowedStatuses[] = 'IN_PROGRESS';
+        }
+        elseif (auth()->user()->role == 'developer')
+        {
+            $allowedStatuses[] = 'TODO';
+            $allowedStatuses[] = 'IN_PROGRESS';
+            $allowedStatuses[] = 'READY_FOR_TEST';
+        }
+        elseif (auth()->user()->role == 'tester')
+        {
+            $allowedStatuses[] = 'PO_REVIEW';
+        }
+
+        else
+        {
+            return response()->json(['status' => false, 'message' => 'Invalid status']);
+        }
+
+        // =============================================================
+        if (in_array($status, $allowedStatuses))
+        {
+            $task->status = $status;
+            $task->save();
+
+            if ($status == 'PO_REVIEW')
+            {
+                $userId = User::where('id', $task->created_by)->first()->id;
+                $this->assignTask($taskId, $userId);
+
+                $this->assignTask($taskId, $userId);
+            }
+
+            elseif ($status == 'READY_FOR_TEST')
+            {
+                $testerWithFewestTasks = User::withCount('tasks')
+                    ->where('role', 'tester')
+                    ->orderBy('tasks_count')
+                    ->first(['id as tester_id']);
+
+                if ($testerWithFewestTasks)
+                {
+                    $testerId = $testerWithFewestTasks->tester_id;
+                    $this->assignTask($taskId, $testerId);
+                }
+
+            }
+
+            elseif (auth()->user()->role == 'product_owner' && in_array($status, ['IN_PROGRESS', 'DONE']))
+            {
+                $userId = User::where('id', $task->assigned_to)->first()->id;
+                $this->assignTask($taskId, $userId);
+            }
+
+            if ($task->assigned_to) {
+                Mail::to($task->assignedUser->email)->send(new TaskAssigned($task));
+            }
+
+            return TasksResource::collection($task);
+        }
+        else
+        {
+            return response()->json(['status' => false, 'message' => 'You are not allowed to perform this action']);
+        }
+    }
+
+    public function getPoReviewTasks()
+    {
+        Gate::authorize('isProductOwner', auth()->user());
+
+        $tasks = Task::where('status', 'PO_REVIEW')->get();
+        return response()->json($tasks);
+
     }
 
     // Other methods for import, export, progress tracking etc.
@@ -162,4 +259,5 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Batch not found'], 404);
     }
+
 }

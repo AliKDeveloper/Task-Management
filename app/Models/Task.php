@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class
-Task extends Model
+class Task extends Model
 {
     use HasFactory;
     public $timestamps = false;
@@ -16,6 +15,7 @@ Task extends Model
         'title',
         'description',
         'assigned_to',
+        'created_by',
         'due_date',
         'status',
         'created_at',
@@ -35,6 +35,5 @@ Task extends Model
     {
         return $this->hasMany(TaskLog::class);
     }
-
 
 }

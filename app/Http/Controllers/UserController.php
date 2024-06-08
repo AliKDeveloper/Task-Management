@@ -67,4 +67,28 @@ class UserController extends Controller
 
         return response()->json(['status' => true, 'message'=>'User has been deleted successfully'], 200);
     }
+
+    public function getProductOwners()
+    {
+        Gate::authorize('isProductOwner', auth()->user());
+
+        $users = User::where('role', 'product_owner')->get();
+        return response()->json($users);
+    }
+
+    public function getDevelopers()
+    {
+        Gate::authorize('isProductOwner', auth()->user());
+
+        $users = User::where('role', 'developer')->get();
+        return response()->json($users);
+    }
+
+    public function getTesters()
+    {
+        Gate::authorize('isProductOwner', auth()->user());
+
+        $users = User::where('role', 'tester')->get();
+        return response()->json($users);
+    }
 }
